@@ -1,0 +1,6 @@
+## Ignore base appsettings that may contain secrets (use User Secrets or env vars)
+appsettings.json
+**/appsettings.json
+# keep sample/template files
+!**/appsettings*.json.example
+!**/appsettings*.json.sample
