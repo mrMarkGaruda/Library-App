@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Library_App.Data;
 using System.Text.Json.Serialization; // for ReferenceHandler
 using Library_App.Services;
+using Microsoft.Data.SqlClient; // for SqlException
+using Library_App.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 // Prefer connection string from env or user secrets. If missing, fall back to appsettings.json.
@@ -32,12 +34,36 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// Custom logging middlewares (non-blocking)
+app.UseMiddleware<AuthorsLoggingMiddleware>();
+app.UseMiddleware<BooksLoggingMiddleware>();
+
 // Automatically apply pending migrations (dev convenience) + seed data
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<Library_AppContext>();
-    db.Database.Migrate();
-    await DbInitializer.SeedAsync(db);
+    var services = scope.ServiceProvider;
+    var db = services.GetRequiredService<Library_AppContext>();
+    var logger = services.GetRequiredService<ILogger<Program>>();
+
+    var skipMigrations = string.Equals(builder.Configuration["SkipDbMigrations"], "true", StringComparison.OrdinalIgnoreCase)
+                      || string.Equals(Environment.GetEnvironmentVariable("SKIP_DB_MIGRATIONS"), "true", StringComparison.OrdinalIgnoreCase);
+
+    if (!skipMigrations)
+    {
+        try
+        {
+            db.Database.Migrate();
+            await DbInitializer.SeedAsync(db);
+        }
+        catch (SqlException ex) when (ex.Number == 40615 || ex.Message.Contains("Client with IP address"))
+        {
+            logger.LogWarning(ex, "Skipping DB migration/seed due to Azure SQL firewall. Allow your client IP in the server firewall or set SKIP_DB_MIGRATIONS=true.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Database migration/seed failed at startup.");
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.

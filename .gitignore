@@ -4,3 +4,15 @@ appsettings.json
 # keep sample/template files
 !**/appsettings*.json.example
 !**/appsettings*.json.sample
+
+## Ensure Visual Studio cache is ignored everywhere (prevents .vs locks from being staged)
+.vs/
+**/.vs/
+**/.vs/**
+*.vsidx
+
+## Ignore build output explicitly for this solution (redundant, but safer)
+Library App/bin/
+Library App/obj/
+Library App/wwwroot/lib/
+
