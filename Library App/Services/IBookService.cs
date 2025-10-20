@@ -5,5 +5,7 @@ public interface IBookService
 {
     Task<List<Book>> GetAllAsync();
     Task<Book?> GetAsync(int id);
-    Task<Book> CreateAsync(string title, int year, int authorId);
+    Task<Book?> GetByIsbnAsync(string isbn);
+    Task<Book> CreateAsync(string title, int year, int authorId, string isbn, int? publisherId = null);
+    Task<Book> ImportByIsbnAsync(string isbn);
 }

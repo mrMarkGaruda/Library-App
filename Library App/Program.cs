@@ -19,6 +19,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 // Register services
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
+builder.Services.AddScoped<IPublisherService, PublisherService>();
+
+// HttpClient for Google Books
+builder.Services.AddHttpClient<IGoogleBooksService, GoogleBooksService>();
 
 // Add services to the container with JSON cycle handling
 builder.Services.AddControllers().AddJsonOptions(o =>

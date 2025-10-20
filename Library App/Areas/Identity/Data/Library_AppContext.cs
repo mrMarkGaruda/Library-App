@@ -29,17 +29,10 @@ public class Library_AppContext : IdentityDbContext<IdentityUser>
             .HasForeignKey(b => b.AuthorId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Optional: Book relations to Publisher/Category (simple many-to-one for demo)
         builder.Entity<Book>()
-            .HasOne<Publisher>()
+            .HasOne(b => b.Publisher)
             .WithMany(p => p.Books)
-            .HasForeignKey("PublisherId")
-            .OnDelete(DeleteBehavior.SetNull);
-
-        builder.Entity<Book>()
-            .HasOne<Category>()
-            .WithMany(c => c.Books)
-            .HasForeignKey("CategoryId")
+            .HasForeignKey(b => b.PublisherId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }
