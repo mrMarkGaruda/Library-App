@@ -14,6 +14,8 @@ public class Library_AppContext : IdentityDbContext<IdentityUser>
 
     public DbSet<Book> Books => Set<Book>();
     public DbSet<Author> Authors => Set<Author>();
+    public DbSet<Publisher> Publishers => Set<Publisher>();
+    public DbSet<Category> Categories => Set<Category>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -26,5 +28,18 @@ public class Library_AppContext : IdentityDbContext<IdentityUser>
             .WithOne(b => b.Author!)
             .HasForeignKey(b => b.AuthorId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Optional: Book relations to Publisher/Category (simple many-to-one for demo)
+        builder.Entity<Book>()
+            .HasOne<Publisher>()
+            .WithMany(p => p.Books)
+            .HasForeignKey("PublisherId")
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<Book>()
+            .HasOne<Category>()
+            .WithMany(c => c.Books)
+            .HasForeignKey("CategoryId")
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
